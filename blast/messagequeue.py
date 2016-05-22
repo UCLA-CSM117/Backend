@@ -1,31 +1,49 @@
 import json
 
 class Message(object):
-    def __init__(self, msg, msgid, timestamp):
-        self.msg = msg
-        self.id = msgid
-        self.time = timestamp
+    def __init__(self, message, token, nickname, timestamp):
+        """Initializes a new Message object"""
+        self.message = message
+        self.token = token
+        self.nickname = nickname
+        self.timestamp = timestamp
 
     def moreRecent(self, timestamp):
-        return (self.time <= timestamp)
+        """Determines if the Message is more recent than the given UTC
+        timestamp"""
+        return (self.timestamp <= timestamp)
 
     def toString(self):
-        return  json.dumps({'msg': self.msg, 'nick': self.nick, 'id': self.id, 'time' : self.time})
+        """Serializes a Message to a JSON string"""
+        return  json.dumps({'message': self.message, 'nickname': self.nickname,
+                            'token': self.token, 'timestamp' : self.timestamp})
+
+    @staticmethod
+    def json_object_hook(data):
+        return Message(data["message"], data["token"], data["nickname"],
+                       data["timestamp"])
 
     @staticmethod
     def fromString(s):
-        return json.loads(s, object_hook=lambda d : Message(d['msg'], d['id'], d['time']))
+        """Deserializes a Message from a JSON string"""
+        return json.loads(s, object_hook=json_object_hook)
 
 class MessageQueue(object):
     def __init__(self, depth):
-        self.msgs = []
+        """Initializes a new MessageQueue object"""
+        self.messages = []
         self.depth = depth
 
     def getRecents(lastTimestamp):
-        return filter(lambda x : x.moreRecent(lastTimestamp), self.msgs)
+        return filter(lambda x : x.moreRecent(lastTimestamp), self.messages)
 
     def getRecentsString(lastTimestamp):
         return "[" + ",".join(getRecents(lastTimestamp)) + "]"
 
-    def pushMessage(self, msg):
-        self.msgs.append(msg)
+    def pushMessage(self, message):
+        """Pushes a new Message onto the queue. If the queue is full, returns
+        False; otherwise, returns True."""
+        if(len(self.messages) < self.depth):
+            self.messages.append(message)
+            return True
+        return False
