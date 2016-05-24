@@ -31,19 +31,21 @@ class Message(object):
 class MessageQueue(object):
     def __init__(self, depth):
         """Initializes a new MessageQueue object"""
-        self.messages = []
+        self.messages = set()
         self.depth = depth
 
-    def getRecents(lastTimestamp):
-        return filter(lambda x : x.moreRecent(lastTimestamp), self.messages)
+    def getRecents(self, lastTimestamp, flush=True):
+        recents = set(filter(lambda x : x.moreRecent(lastTimestamp), self.messages))
+        messages = self.messages.difference(recents)
+        return recents
 
-    def getRecentsString(lastTimestamp):
-        return "[" + ",".join(getRecents(lastTimestamp)) + "]"
+    def getRecentsString(self, lastTimestamp):
+        return "[" + ",".join(self.getRecents(lastTimestamp)) + "]"
 
     def pushMessage(self, message):
         """Pushes a new Message onto the queue. If the queue is full, returns
         False; otherwise, returns True."""
         if(len(self.messages) < self.depth):
-            self.messages.append(message)
+            self.messages.add(message)
             return True
         return False
