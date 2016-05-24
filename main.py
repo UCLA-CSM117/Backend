@@ -32,8 +32,10 @@ def handleNewToken(request_object):
     request = request_object["request"]
     nickname = request_object["nickname"]
 
-    if(userGraph.getUserByNickname(nickname)):
-        return failResponse()
+    try:
+        userGraph.getUserByNickname(nickname)
+    except Exception as e:
+        return failResponse({"reason": e.message})
 
     newuser = userGraph.addUserByNickname(nickname)
     token = newuser.token
