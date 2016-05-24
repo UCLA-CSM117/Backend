@@ -79,8 +79,11 @@ class UserGraph(object):
         graph = sending_user.getConnected(sending_user)
         if sending_user in graph:
             graph.remove(sending_user)
+        totalSuccess = True
         for user in graph:
-            user.getQueue().pushMessage(message)
+            if not user.getQueue().pushMessage(message):
+                totalSuccess = False
+        return totalSuccess
 
     def registerConnections(self, user, nearby_users):
         user.addAdjacents(nearby_users)
