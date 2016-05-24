@@ -16,22 +16,55 @@ queue = blast.messagequeue.MessageQueue(1000)
 
 userGraph = blast.user.UserGraph()
 
+def merge_dicts(*dict_args):
+    result = dict()
+    for d in dict_args:
+        result.update(d)
+    return result
+
+def failResponse(response_dict = {}):
+    return merge_dicts({"status":"FAIL"}, response_dict)
+
+def okResponse(response_dict = {}):
+    return merge_dicts({"status":"OK"}, response_dict)
+
 def handleNewToken(request_object):
     request = request_object["request"]
     nickname = request_object["nickname"]
 
-    token = userGraph.addUserByNickname(nickname)
+    if(userGraph.getUserByNickname(nickname)):
+        return failResponse()
 
-    return json.dumps({"request": request, "status": "OK", "token": token})
+    newuser = userGraph.addUserByNickname(nickname)
+    token = newuser.token
+
+    return okResponse({"token": token})
 
 def handleNewMessages(request_object):
     timestamp = request_object["timestamp"]
     token = request_object["token"]
-    messages = [] #userManager.getUserByToken(token).getQueue().getRecentsString()
-    return json.dumps({"request": request, "status": "OK", "messages": messages})
+    messages = userManager.getUserByToken(token).getQueue().getRecentsString()
+    return okResponse({"messages": messages})
 
 def handleSendMessage(request_object):
-    message = blast.messagequeue.Message.fromString(json.dumps(request_object["message"]))
+    message = request_object["message"]
+    message_object = blast.messagequeue.Message(message["message"],
+                                                message["token"],
+                                                message["nickname"],
+                                                message["timestamp"])
+
+    if userGraph.pushMessage(message_object):
+        return okResponse()
+    return failResponse()
+
+def handleNearbyTokens(request_object):
+    token = request_object["token"]
+    nearby_tokens = request_object["nearby_tokens"]
+
+    user = userGraph.getUserByToken(token)
+    neaby_users = map(userGraph.getUserByToken, nearby_tokens)
+
+    userGraph.registerConnections(user, neaby_users)
 
 def processRequestString(request_string):
     request_object = json.loads(request_string)
@@ -39,16 +72,17 @@ def processRequestString(request_string):
     request = request_object["request"]
     print "request: ", request
 
-    response = \
+    response_object = \
     {"NEWTOKEN" : handleNewToken,
      "NEWMESSAGES" : handleNewMessages,
-     "SENDMESSAGE" : handleSendMessage
+     "SENDMESSAGE" : handleSendMessage,
+     "NEARBYTOKENS" : handleNearbyTokens
     }[request](request_object)
 
-    return response
+    return json.dumps(merge_dicts(response_object, {"request": request}))
 
 def failString():
-    return json.dumps({"status": "FAIL"})
+    return json.dumps(failResponse())
 
 class Echo(protocol.Protocol):
     def dataReceived(self, data):
