@@ -40,7 +40,7 @@ class MessageQueue(object):
         return recents
 
     def getRecentsString(self, lastTimestamp):
-        return "[" + ",".join(self.getRecents(lastTimestamp)) + "]"
+        return "[" + ",".join([x.toString() for x in self.getRecents(lastTimestamp)]) + "]"
 
     def pushMessage(self, message):
         """Pushes a new Message onto the queue. If the queue is full, returns
