@@ -4,6 +4,7 @@ import blast.messagequeue
 import blast.user
 from twisted.internet import protocol, reactor, endpoints
 import json
+import traceback
 
 queue = blast.messagequeue.MessageQueue(1000)
 
@@ -99,7 +100,10 @@ class Echo(protocol.Protocol):
             print "SENDING: %s" % response
             self.transport.write(response)
         except Exception as e:
-            self.transport.write(failString())
+            self.transport.write(json.dumps(failResponse({"reason":e.message})))
+
+            traceback.print_exc()
+            print "FAILED: %s" % e.message
         self.transport.loseConnection()
 
 class EchoFactory(protocol.Factory):
