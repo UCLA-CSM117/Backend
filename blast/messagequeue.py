@@ -13,10 +13,14 @@ class Message(object):
         timestamp"""
         return (self.timestamp <= timestamp)
 
+    def toDict(self):
+        """Converts a message to a dict"""
+        return  {'message': self.message, 'nickname': self.nickname,
+                 'token': self.token, 'timestamp' : self.timestamp}
+
     def toString(self):
         """Serializes a Message to a JSON string"""
-        return  json.dumps({'message': self.message, 'nickname': self.nickname,
-                            'token': self.token, 'timestamp' : self.timestamp})
+        return  json.dumps(self.toDict())
 
     @staticmethod
     def json_object_hook(data):
@@ -35,8 +39,8 @@ class MessageQueue(object):
         self.depth = depth
 
     def getRecents(self, lastTimestamp, flush=True):
-        recents = set(filter(lambda x : x.moreRecent(lastTimestamp), self.messages))
-        messages = self.messages.difference(recents)
+        recents = [x.toDict() for x in self.messages] #set(filter(lambda x : x.moreRecent(lastTimestamp), self.messages))
+        self.messages = set() #self.messages.difference(recents)
         return recents
 
     def getRecentsStrings(self, lastTimestamp):
