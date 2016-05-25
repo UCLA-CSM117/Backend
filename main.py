@@ -46,7 +46,11 @@ def handleNewToken(request_object):
 def handleNewMessages(request_object):
     timestamp = request_object["timestamp"]
     token = request_object["token"]
-    messages = userManager.getUserByToken(token).getQueue().getRecentsString()
+
+    user = userGraph.getUserByToken(int(token))
+    user_queue = user.getQueue()
+    recents_string = user_queue.getRecentsStrings(timestamp)
+    messages = recents_string
     return okResponse({"messages": messages})
 
 def handleSendMessage(request_object):
