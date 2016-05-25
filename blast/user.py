@@ -62,6 +62,7 @@ class UserGraph(object):
         raise Exception("No user with nickname %s" % nickname)
 
     def getUserByToken(self, token):
+        token = str(token)
         for user in self.users:
             if user.token == token:
                 return user
@@ -71,8 +72,8 @@ class UserGraph(object):
         token = random.randint(0, 2**64-1)
         while(token in self.tokens):
             token = random.randint(0, 2**64-1)
-        self.tokens.add(token)
-        return token
+        self.tokens.add(str(token))
+        return str(token)
 
     def pushMessage(self, message):
         sending_user = self.getUserByToken(message.token)
