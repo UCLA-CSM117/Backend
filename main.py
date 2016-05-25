@@ -76,9 +76,7 @@ def handleNearbyTokens(request_object):
 
 def processRequestString(request_string):
     request_object = json.loads(request_string)
-    print "Request object: ", request_object
     request = request_object["request"]
-    print "request: ", request
 
     response_object = \
     {"NEWTOKEN" : handleNewToken,
