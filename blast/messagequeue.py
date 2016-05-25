@@ -4,9 +4,9 @@ class Message(object):
     def __init__(self, message, token, nickname, timestamp):
         """Initializes a new Message object"""
         self.message = message
-        self.token = token
+        self.token = str(token)
         self.nickname = nickname
-        self.timestamp = timestamp
+        self.timestamp = int(timestamp)
 
     def moreRecent(self, timestamp):
         """Determines if the Message is more recent than the given UTC
@@ -20,8 +20,8 @@ class Message(object):
 
     @staticmethod
     def json_object_hook(data):
-        return Message(data["message"], data["token"], data["nickname"],
-                       data["timestamp"])
+        return Message(data["message"], str(data["token"]), data["nickname"],
+                       int(data["timestamp"]))
 
     @staticmethod
     def fromString(s):
@@ -39,8 +39,8 @@ class MessageQueue(object):
         messages = self.messages.difference(recents)
         return recents
 
-    def getRecentsString(self, lastTimestamp):
-        return "[" + ",".join([x.toString() for x in self.getRecents(lastTimestamp)]) + "]"
+    def getRecentsStrings(self, lastTimestamp):
+        return [x.toString() for x in self.getRecents(lastTimestamp)]
 
     def pushMessage(self, message):
         """Pushes a new Message onto the queue. If the queue is full, returns
