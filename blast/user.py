@@ -77,7 +77,7 @@ class UserGraph(object):
 
     def pushMessage(self, message):
         sending_user = self.getUserByToken(message.token)
-        graph = sending_user.getConnected(sending_user)
+        graph = sending_user.getConnected(0)
         if sending_user in graph:
             graph.remove(sending_user)
         totalSuccess = True
