@@ -73,6 +73,8 @@ def handleNearbyTokens(request_object):
 
     userGraph.registerConnections(user, neaby_users)
 
+    return okResponse()
+
 def processRequestString(request_string):
     request_object = json.loads(request_string)
     request = request_object["request"]
