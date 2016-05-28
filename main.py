@@ -68,6 +68,10 @@ def handleNearbyTokens(request_object):
     token = request_object["token"]
     nearby_tokens = request_object["nearby_tokens"]
 
+    if None in nearby_tokens:
+        print "Client sent null nearby tokens: ", nearby_tokens
+    nearby_tokens = filter(lambda x : not x == None, nearby_tokens)
+
     user = userGraph.getUserByToken(token)
     neaby_users = map(userGraph.getUserByToken, nearby_tokens)
 
