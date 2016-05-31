@@ -75,7 +75,7 @@ def handleNearbyTokens(request_object):
     user = userGraph.getUserByToken(token)
     neaby_users = map(userGraph.getUserByToken, nearby_tokens)
 
-    userGraph.registerConnections(user, neaby_users)
+    userGraph.updateConnections(user, neaby_users)
 
     return okResponse()
 
