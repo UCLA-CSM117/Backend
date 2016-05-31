@@ -13,22 +13,14 @@ class User(object):
 
     def addAdjacents(self, users):
         """Register adjacent users with this user"""
-        poplist = []
-        for k in self.adjacents.keys():
-            self.adjacents[k] -= 0.1
-            if(self.adjacents[k] < 0):
-                poplist.append(k)
-        for k in poplist:
-            self.adjacents.pop(k)
-
         for user in users:
             self.adjacents[user] = 1.0
-            if self in user.adjacents:
-                user.adjacents[self] -= 0.1
-            else:
-                user.adjacents[self] = 1.0
 
-    def getConnected(self, threshold):
+    def updateAdjacents(self, users):
+        self.adjacents = dict()
+        self.addAdjacents(users)
+
+    def getConnected(self, threshold=0.5):
         return self.__getConnected__(threshold, set())
 
     def __getConnected__(self, threshold, partial):
@@ -86,5 +78,8 @@ class UserGraph(object):
                 totalSuccess = False
         return totalSuccess
 
-    def registerConnections(self, user, nearby_users):
+    def addConnections(self, user, nearby_users):
         user.addAdjacents(nearby_users)
+
+    def updateConnections(self, user, nearby_users):
+        user.updateAdjacents(nearby_users)
