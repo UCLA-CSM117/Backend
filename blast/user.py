@@ -17,6 +17,11 @@ class User(object):
             self.adjacents[user] = 1.0
 
     def updateAdjacents(self, users):
+        for other in self.adjacents.keys():
+            try:
+                del other.adjacents[self]
+            except Exception as e:
+                pass
         self.adjacents = dict()
         self.addAdjacents(users)
 
