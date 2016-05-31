@@ -15,6 +15,7 @@ class User(object):
         """Register adjacent users with this user"""
         for user in users:
             self.adjacents[user] = 1.0
+            user.adjacents[self] = 1.0
 
     def updateAdjacents(self, users):
         for other in self.adjacents.keys():
@@ -92,7 +93,3 @@ class UserGraph(object):
 
     def updateConnections(self, user, nearby_users):
         user.updateAdjacents(nearby_users)
-        for otheruser in nearby_users:
-            if otheruser == user:
-                continue
-            otheruser.updateAdjacents([user])
