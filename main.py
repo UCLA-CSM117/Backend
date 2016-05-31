@@ -92,6 +92,30 @@ def processRequestString(request_string):
 
     return json.dumps(merge_dicts(response_object, {"request": request}))
 
+def getGraphString():
+    nodes = []
+    edges = []
+    def addNode(token, nickname):
+        nodes.append({'token': token, 'nickname': nickname})
+    def addEdge(t1, t2):
+        newElem = {'to': t1 if t1 < t2 else t2, 'from': t2 if t1 < t2 else t1}
+        if not newElem in edges:
+            edges.append(newElem)
+
+    for user in userGraph.users:
+        addNode(user.token, user.nickname)
+        for otheruser in user.adjacents:
+            addEdge(otheruser.token, user.token)
+
+    return json.dumps({'nodes':nodes, 'edges':edges})
+
+def processHTTPRequest(request_string):
+
+    if not 'callback=updateGraph' in request_string:
+        return ""
+
+    return "updateGraph(" + getGraphString() + ")"
+
 def failString():
     return json.dumps(failResponse())
 
@@ -99,7 +123,12 @@ class Echo(protocol.Protocol):
     def dataReceived(self, data):
         try:
             print "GOT: %s" % data
-            response = (processRequestString(data))
+            response = ''
+            # This is a hack to determine which protocol the query is using
+            if 'GET' == data[:3]:
+                response = processHTTPRequest(data)
+            else:
+                response = (processRequestString(data))
             print "SENDING: %s" % response
             self.transport.write(response)
         except Exception as e:
