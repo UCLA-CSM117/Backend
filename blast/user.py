@@ -80,6 +80,14 @@ class UserGraph(object):
 
     def addConnections(self, user, nearby_users):
         user.addAdjacents(nearby_users)
+        for otheruser in nearby_users:
+            if otheruser == user:
+                continue
+            otheruser.addAdjacents([user])
 
     def updateConnections(self, user, nearby_users):
         user.updateAdjacents(nearby_users)
+        for otheruser in nearby_users:
+            if otheruser == user:
+                continue
+            otheruser.updateAdjacents([user])
